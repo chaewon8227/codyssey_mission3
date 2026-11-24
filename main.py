@@ -1,6 +1,7 @@
 """Mini NPU Simulator - MAC 연산으로 Cross / X 패턴을 판별한다."""
 
 import json
+import math
 import os
 import time
 
@@ -46,6 +47,8 @@ def is_square(matrix, n):
             return False
         for v in row:
             if not isinstance(v, (int, float)) or isinstance(v, bool):
+                return False
+            if not math.isfinite(v):          # nan, inf 거부
                 return False
     return True
 
@@ -132,13 +135,17 @@ def read_matrix(title, n=3):
                 ok = False
                 break
             try:
-                rows.append([float(p) for p in parts])
+                values = [float(p) for p in parts]
             except ValueError:
                 ok = False
                 break
+            if not all(math.isfinite(v) for v in values):   # nan, inf 거부
+                ok = False
+                break
+            rows.append(values)
         if ok:
             return rows
-        print(f"입력 형식 오류: 각 줄에 {n}개의 숫자를 공백으로 구분해 입력하세요. 다시 입력합니다.\n")
+        print(f"입력 형식 오류: 각 줄에 {n}개의 숫자(nan, inf 제외)를 공백으로 구분해 입력하세요. 다시 입력합니다.\n")
 
 
 def mode_user():
